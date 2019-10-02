@@ -210,7 +210,7 @@ class Medgan(object):
                 output = sess.run(x_reconst, feed_dict={x_random:randomX, bn_train:True})
 
             print('generating')
-            nBatches = int(np.ceil(float(nSamples)) / float(batchSize))
+            nBatches = int(np.ceil(float(nSamples) / float(batchSize)))
             for i in range(nBatches):
                 randomX = np.random.normal(size=(batchSize, self.randomDim))
                 output = sess.run(x_reconst, feed_dict={x_random:randomX, bn_train:False})
@@ -277,8 +277,8 @@ class Medgan(object):
         with tf.Session() as sess:
             if modelPath == '': sess.run(initOp)
             else: saver.restore(sess, modelPath)
-            nTrainBatches = int(np.ceil(float(trainX.shape[0])) / float(pretrainBatchSize))
-            nValidBatches = int(np.ceil(float(validX.shape[0])) / float(pretrainBatchSize))
+            nTrainBatches = int(np.ceil(float(trainX.shape[0]) / float(pretrainBatchSize)))
+            nValidBatches = int(np.ceil(float(validX.shape[0]) / float(pretrainBatchSize)))
 
             if modelPath== '':
                 for epoch in range(pretrainEpochs):
@@ -305,7 +305,7 @@ class Medgan(object):
                 g_loss_vec = []
                 for i in range(nBatches):
                     for _ in range(discriminatorTrainPeriod):
-                        batchIdx = np.random.choice(idx, size=batchSize, replace=False)
+                        batchIdx = np.random.choice(idx, size=batchSize, replace=False) # Can be changed to True if batchSize < trainX.shape[0]
                         batchX = trainX[batchIdx]
                         randomX = np.random.normal(size=(batchSize, self.randomDim))
                         _, discLoss = sess.run([optimize_d, loss_d], feed_dict={x_raw:batchX, x_random:randomX, keep_prob:1.0, bn_train:False})
@@ -320,7 +320,7 @@ class Medgan(object):
                 validAccVec = []
                 validAucVec = []
                 for i in range(nBatches):
-                    batchIdx = np.random.choice(idx, size=batchSize, replace=False)
+                    batchIdx = np.random.choice(idx, size=batchSize, replace=False) # Can be changed to True if batchSize < trainX.shape[0]
                     batchX = validX[batchIdx]
                     randomX = np.random.normal(size=(batchSize, self.randomDim))
                     preds_real, preds_fake, = sess.run([y_hat_real, y_hat_fake], feed_dict={x_raw:batchX, x_random:randomX, keep_prob:1.0, bn_train:False})
